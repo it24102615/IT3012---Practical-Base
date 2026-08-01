@@ -9,7 +9,9 @@ class VisualGridHuntGame:
     def __init__(self, width=10, height=10, num_food=10, num_opponents=2, custom_walls=None):
         self.width = width
         self.height = height
+        #lab02
         self.agent_pos = [0, 0]  # Starting position (x, y)
+        self.agent_direction = "Right"  # Agent initially faces right
 
         if custom_walls is not None:
             self.walls = set(custom_walls)
@@ -53,21 +55,51 @@ class VisualGridHuntGame:
         self.steps = 0
         self.collision = False
 
+    #lab 02
     def get_percept(self) -> dict:
-        return {
-            'agent_pos': list(self.agent_pos),
-            'opponent_positions': [list(op) for op in self.opponents],
-            'smells_food': tuple(self.agent_pos) in self.food_positions,
-            'smells_toxin': tuple(self.agent_pos) in self.toxic_traps,
-            'hit_wall': tuple(self.agent_pos) in self.walls,
-            'collision': self.collision,
-            'score': self.score,
-            'remaining_food': len(self.food_positions)
-        }
+    x, y = self.agent_pos
 
+    # Determine the cell directly in front of the agent
+    if self.agent_direction == "Up":
+        front = (x, y + 1)
+    elif self.agent_direction == "Down":
+        front = (x, y - 1)
+    elif self.agent_direction == "Left":
+        front = (x - 1, y)
+    else:   # Right
+        front = (x + 1, y)
+
+    # Check whether there is a wall in front
+    wall_ahead = (
+        front[0] < 0 or
+        front[0] >= self.width or
+        front[1] < 0 or
+        front[1] >= self.height or
+        front in self.walls
+    )
+
+    return {
+        "wall_ahead": wall_ahead,
+        "food_here": tuple(self.agent_pos) in self.food_positions,
+        "toxin_here": tuple(self.agent_pos) in self.toxic_traps,
+        "collision": self.collision
+    }
+
+    #lab 02
     def execute_action(self, action: str):
-        self.steps += 1
-        new_pos = list(self.agent_pos)
+    self.steps += 1
+
+    # Update the direction the agent is facing
+    if action == "Up":
+        self.agent_direction = "Up"
+    elif action == "Down":
+        self.agent_direction = "Down"
+    elif action == "Left":
+        self.agent_direction = "Left"
+    elif action == "Right":
+        self.agent_direction = "Right"
+
+    new_pos = list(self.agent_pos)
 
         if action == 'Up':
             new_pos[1] = min(self.height - 1, new_pos[1] + 1)
