@@ -101,14 +101,21 @@ class VisualGridHuntGame:
 
     new_pos = list(self.agent_pos)
 
+        #step 1.2
         if action == 'Up':
             new_pos[1] = min(self.height - 1, new_pos[1] + 1)
+
         elif action == 'Down':
             new_pos[1] = max(0, new_pos[1] - 1)
+
         elif action == 'Left':
             new_pos[0] = max(0, new_pos[0] - 1)
+
         elif action == 'Right':
             new_pos[0] = min(self.width - 1, new_pos[0] + 1)
+
+elif action == 'Stay':
+    pass
 
         if tuple(new_pos) in self.walls:
             self.score -= 5
@@ -143,6 +150,20 @@ class VisualGridHuntGame:
     def is_done(self) -> bool:
         return len(self.food_positions) == 0 or self.steps >= 60 or self.collision
 
+#lab 02 step 1.2
+class SimpleReflexAgent:
+    """Simple Reflex Agent using Condition-Action Rules."""
+
+    def sense_and_act(self, percept):
+
+        if percept["food_here"]:
+            return "Stay"
+
+        elif percept["wall_ahead"]:
+            return "Left"
+
+        else:
+            return "Right"
 
 class GridGameGUI:
     """Tkinter wrapper that dynamically scales cell sizes to keep larger grids on screen."""
@@ -153,6 +174,8 @@ class GridGameGUI:
 
         self.env = VisualGridHuntGame(width=width, height=height, num_food=num_food, num_opponents=num_opponents,
                                       custom_walls=walls)
+        #step 1.2
+        self.agent = SimpleReflexAgent()
 
         # Dynamically calculate cell size so the total canvas fits nicely within a 600x600 window ceiling
         max_canvas_dim = 600
@@ -230,7 +253,9 @@ class GridGameGUI:
 
         def step():
             if not self.env.is_done():
-                action = random.choice(['Up', 'Down', 'Left', 'Right'])
+                #step 1.2 lab 2
+                percept = self.env.get_percept()
+                action = self.agent.sense_and_act(percept)
                 self.env.execute_action(action)
 
                 self.draw_grid()
