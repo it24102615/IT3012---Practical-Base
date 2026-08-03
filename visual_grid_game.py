@@ -148,12 +148,21 @@ class VisualGridHuntGame:
 class SimpleReflexAgent:
 
     def sense_and_act(self, percept):
+
         if percept["food_here"]:
             return "Stay"
-        elif percept["wall_ahead"]:
-            return "Up"
-        else:
+
+        elif not percept["right_wall"]:
             return "Right"
+
+        elif not percept["upper_wall"]:
+            return "Up"
+
+        elif not percept["left_wall"]:
+            return "Left"
+
+        else:
+            return "Down"
 
 
 class ModelBasedAgent:
@@ -163,6 +172,7 @@ class ModelBasedAgent:
         self.visited_states = set()
 
     def sense_and_act(self, percept):
+
         state = (
             percept["right_wall"],
             percept["left_wall"],
@@ -170,20 +180,27 @@ class ModelBasedAgent:
             percept["lower_wall"],
         )
 
-        self.visited_states.add(state)
-
         if percept["food_here"]:
             action = "Stay"
+
+        elif state in self.visited_states:
+            action = "Up"
+
         elif not percept["right_wall"]:
             action = "Right"
+
         elif not percept["upper_wall"]:
             action = "Up"
+
         elif not percept["left_wall"]:
             action = "Left"
+
         else:
             action = "Down"
 
+        self.visited_states.add(state)
         self.last_action = action
+
         return action
 
 
