@@ -3,6 +3,7 @@
 import random
 from collections import deque
 import heapq
+import math
 
 
 class GreedyGridAgent:
@@ -20,14 +21,14 @@ class GreedyGridAgent:
 
 
 class SearchAgent:
-    """Goal-based agent that uses BFS, DFS, or UCS to find food."""
+    """Goal-based agent that uses BFS, DFS, UCS, or A* to find food."""
 
     def __init__(self):
         # Complete sequence of actions to execute
         self.plan = []
 
         # Select search algorithm
-        self.active_algo = "BFS"
+        self.active_algo = "AStar"
 
     def get_neighbors(self, state, percept):
         """Return valid actions and resulting states from the current state."""
@@ -165,6 +166,110 @@ class SearchAgent:
 
         return []
 
+    def manhattan_distance(self, pos, goal):
+        """Calculate Manhattan distance between two positions."""
+
+        x1, y1 = pos
+        x2, y2 = goal
+
+        return abs(x1 - x2) + abs(y1 - y2)
+
+    def euclidean_distance(self, pos, goal):
+        """Calculate Euclidean distance between two positions."""
+
+        x1, y1 = pos
+        x2, y2 = goal
+
+        return math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
+
+    def astar_search(
+        self, start_pos, goal_pos, walls, grid_size, heuristic_type="manhattan"
+    ):
+        """A* Search using f(n) = g(n) + h(n)."""
+
+        print("A* Search Started")
+        print("Start:", start_pos)
+        print("Goal:", goal_pos)
+
+        frontier = []
+
+        reached_states = set()
+
+        # Starting node
+        g_cost = 0
+
+        if heuristic_type == "manhattan":
+            h_cost = self.manhattan_distance(start_pos, goal_pos)
+        else:
+            h_cost = self.euclidean_distance(start_pos, goal_pos)
+
+        f_cost = g_cost + h_cost
+
+        heapq.heappush(frontier, (f_cost, g_cost, start_pos, []))
+
+        width, height = grid_size
+        walls = set(walls)
+
+        while frontier:
+
+            f_cost, g_cost, current_pos, path_taken = heapq.heappop(frontier)
+
+            # Goal test
+            if current_pos == goal_pos:
+                return path_taken
+
+            # Do not expand an already reached state
+            if current_pos in reached_states:
+                continue
+
+            reached_states.add(current_pos)
+
+            x, y = current_pos
+
+            actions = [
+                ("Up", (x, y + 1)),
+                ("Down", (x, y - 1)),
+                ("Left", (x - 1, y)),
+                ("Right", (x + 1, y)),
+            ]
+
+            for action, new_pos in actions:
+
+                nx, ny = new_pos
+
+                # Check grid boundaries
+                if nx < 0 or nx >= width:
+                    continue
+
+                if ny < 0 or ny >= height:
+                    continue
+
+                # Check walls
+                if new_pos in walls:
+                    continue
+
+                # Check reached states
+                if new_pos in reached_states:
+                    continue
+
+                # Calculate g(n)
+                new_g_cost = g_cost + 1
+
+                # Calculate h(n)
+                if heuristic_type == "manhattan":
+                    new_h_cost = self.manhattan_distance(new_pos, goal_pos)
+                else:
+                    new_h_cost = self.euclidean_distance(new_pos, goal_pos)
+
+                # Calculate f(n)
+                new_f_cost = new_g_cost + new_h_cost
+
+                new_path = path_taken + [action]
+
+                heapq.heappush(frontier, (new_f_cost, new_g_cost, new_pos, new_path))
+
+        return []
+
     def sense_and_act(self, percept):
         """Create a complete plan and execute it one action at a time."""
 
@@ -193,6 +298,21 @@ class SearchAgent:
             elif self.active_algo == "UCS":
 
                 self.plan = self.ucs_search(start, goals, percept)
+
+            elif self.active_algo == "AStar":
+
+                # Select the closest food as the goal
+                goal_pos = min(
+                    goals, key=lambda food: self.manhattan_distance(start, food)
+                )
+
+                self.plan = self.astar_search(
+                    start,
+                    goal_pos,
+                    percept["walls"],
+                    percept["grid_size"],
+                    heuristic_type="manhattan",
+                )
 
         # Execute the next action from the plan
         if self.plan:
