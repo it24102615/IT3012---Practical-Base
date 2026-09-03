@@ -14,25 +14,32 @@ class TestPractical1And2_ReflexAgents(unittest.TestCase):
             self.simple_agent = SimpleReflexAgent()
             self.model_agent = ModelBasedAgent()
         except NameError:
-            self.fail("Agent classes not found. Ensure SimpleReflexAgent and ModelBasedAgent are defined.")
+            self.fail(
+                "Agent classes not found. Ensure SimpleReflexAgent and ModelBasedAgent are defined."
+            )
 
     def test_simple_reflex_logic(self):
         """Test 1: Simple Reflex Agent should react purely to immediate percepts."""
         # Scenario A: Food is present -> Agent should want to collect/stay/move appropriately
-        percept_food = {'wall_ahead': False, 'food_here': True}
+        percept_food = {"wall_ahead": False, "food_here": True}
         action = self.simple_agent.sense_and_act(percept_food)
-        self.assertIsNotNone(action, "SimpleReflexAgent returned None instead of an action.")
+        self.assertIsNotNone(
+            action, "SimpleReflexAgent returned None instead of an action."
+        )
 
         # Scenario B: Wall is ahead -> Agent must turn or change direction
-        percept_wall = {'wall_ahead': True, 'food_here': False}
+        percept_wall = {"wall_ahead": True, "food_here": False}
         action_wall = self.simple_agent.sense_and_act(percept_wall)
-        self.assertIn(action_wall, ['Left', 'Right', 'Down', 'Up'],
-                      "Agent did not output a valid movement action when facing a wall.")
+        self.assertIn(
+            action_wall,
+            ["Left", "Right", "Down", "Up"],
+            "Agent did not output a valid movement action when facing a wall.",
+        )
 
     def test_model_based_memory(self):
         """Test 2: Model-Based Agent should maintain internal state to escape loops."""
         # Feed the exact same percept twice to simulate being stuck in a corner
-        percept = {'wall_ahead': True, 'food_here': False}
+        percept = {"wall_ahead": True, "food_here": False}
 
         action_1 = self.model_agent.sense_and_act(percept)
         action_2 = self.model_agent.sense_and_act(percept)
@@ -42,7 +49,7 @@ class TestPractical1And2_ReflexAgents(unittest.TestCase):
         self.assertNotEqual(
             action_1,
             action_2,
-            "ModelBasedAgent returned the exact same action twice in a row for the same percept. Internal state/memory is not working correctly."
+            "ModelBasedAgent returned the exact same action twice in a row for the same percept. Internal state/memory is not working correctly.",
         )
 
 
@@ -83,11 +90,17 @@ class TestPractical3_SearchAgent(unittest.TestCase):
 
         # Verify the path is valid and optimal
         self.assertIsNotNone(path, "BFS returned None. No path found.")
-        self.assertIsInstance(path, list, "BFS should return a list of actions (strings).")
+        self.assertIsInstance(
+            path, list, "BFS should return a list of actions (strings)."
+        )
 
         # The shortest path taking Manhattan distance around these specific walls is exactly 6 steps.
         # Path: Up -> Right -> Right -> Right -> Up -> Up
-        self.assertEqual(len(path), 6, f"BFS did not find the optimal path. Expected 6 steps, got {len(path)}.")
+        self.assertEqual(
+            len(path),
+            6,
+            f"BFS did not find the optimal path. Expected 6 steps, got {len(path)}.",
+        )
 
     def test_bfs_unreachable_goal(self):
         """Test 4: BFS must correctly return failure (None/Empty) if goal is blocked."""
@@ -102,10 +115,13 @@ class TestPractical3_SearchAgent(unittest.TestCase):
 
         # The agent should realize it's impossible and return None or an empty list
         is_empty_or_none = (path is None) or (len(path) == 0)
-        self.assertTrue(is_empty_or_none, "BFS should return None or [] when the goal is unreachable.")
+        self.assertTrue(
+            is_empty_or_none,
+            "BFS should return None or [] when the goal is unreachable.",
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Run the test suite
     print("=== IT3012: Intelligent Agents - Autograder Test Suite ===\n")
     unittest.main(verbosity=2)

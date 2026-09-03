@@ -19,24 +19,24 @@ class GridHuntGame:
 
     def get_percept(self, agent) -> dict:
         return {
-            'agent_pos': list(self.agent_pos),
-            'smells_food': tuple(self.agent_pos) in self.food_positions,
-            'hit_wall': tuple(self.agent_pos) in self.walls,
-            'score': self.score,
-            'remaining_food': len(self.food_positions)
+            "agent_pos": list(self.agent_pos),
+            "smells_food": tuple(self.agent_pos) in self.food_positions,
+            "hit_wall": tuple(self.agent_pos) in self.walls,
+            "score": self.score,
+            "remaining_food": len(self.food_positions),
         }
 
     def execute_action(self, agent, action: str):
         self.steps += 1
         new_pos = list(self.agent_pos)
 
-        if action == 'Up':
+        if action == "Up":
             new_pos[1] = min(self.height - 1, new_pos[1] + 1)
-        elif action == 'Down':
+        elif action == "Down":
             new_pos[1] = max(0, new_pos[1] - 1)
-        elif action == 'Left':
+        elif action == "Left":
             new_pos[0] = max(0, new_pos[0] - 1)
-        elif action == 'Right':
+        elif action == "Right":
             new_pos[0] = min(self.width - 1, new_pos[0] + 1)
 
         # Check collision with walls
